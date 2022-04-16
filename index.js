@@ -1,3 +1,12 @@
+// Importing Sound Effects
+const introMusic = new Audio("./music/introSong.mp3");
+const shootingSound = new Audio("./music/shoooting.mp3");
+const killEnemySound = new Audio("./music/killEnemy.mp3");
+const gameOverSound = new Audio("./music/gameOver.mp3");
+const heavyWeaponSound = new Audio("./music/heavyWeapon.mp3");
+const hugeWeaponSound = new Audio("./music/hugeWeapon.mp3");
+
+introMusic.play();
 //Basic Environment Setup
 
 const canvas = document.createElement("canvas");
@@ -7,7 +16,6 @@ canvas.height = innerHeight;
 const context = canvas.getContext("2d");
 const lightWeaponDamage = 10;
 const heavyWeaponDamage = 20;
-const hugeWeaponDamage = 50;
 let difficulty = 2;
 const form = document.querySelector("form");
 const scoreBoard = document.querySelector(".scoreBoard");
@@ -17,6 +25,9 @@ let playScore = 0;
 //Event Listener for Difficulty Form
 document.querySelector("input").addEventListener("click", (e) => {
   e.preventDefault();
+
+  // Stoping Music
+  introMusic.pause();
 
   //Making form invisible
   form.style.display = "none";
@@ -144,11 +155,10 @@ class Weapon {
 
 //Creating Huge Weapon Class
 class HugeWeapon {
-  constructor(x, y, damage) {
+  constructor(x, y) {
     this.x = x;
     this.y = y;
     this.color = "rgba(255,0,133,1)";
-    this.damage = damage;
   }
   draw() {
     context.beginPath();
@@ -331,6 +341,7 @@ function animation() {
     //Stopping Game if enemy hit player
     if (distanceBetweenPlayerAndEnemy - pla.radius - enemy.radius < 1) {
       cancelAnimationFrame(animationId);
+      gameOverSound.play();
       return gameoverLoader();
     }
 
@@ -344,6 +355,7 @@ function animation() {
         // Increasing player score when killing one enemy
         playScore += 10;
         setTimeout(() => {
+          killEnemySound.play();
           enemies.splice(enemyIndex, 1);
         }, 0);
       }
@@ -356,6 +368,7 @@ function animation() {
         weapon.y - enemy.y
       );
       if (distanceBetweenWeaponAndEnemy - weapon.radius - enemy.radius < 1) {
+        killEnemySound.play();
         //Reducing size of enemy on hit
         if (enemy.radius > weapon.damage + 8) {
           gsap.to(enemy, {
@@ -379,7 +392,7 @@ function animation() {
           playScore += 10;
 
           //Rendering player Score in score board html element
-          scoreBoard.innerHTML = `Score:${playScore}`;
+          scoreBoard.innerHTML = `Score:${playScore}`;          
           setTimeout(() => {
             enemies.splice(enemyIndex, 1);
             weapons.splice(weaponIndex, 1);
@@ -394,6 +407,7 @@ function animation() {
 
 // Event Listener for Light Weapon aka left click
 canvas.addEventListener("click", (e) => {
+  shootingSound.play();
   //finding angle between player position(center) and click co-ordinates
   const myAngle = Math.atan2(
     e.clientY - canvas.height / 2,
@@ -419,6 +433,7 @@ canvas.addEventListener("click", (e) => {
 // ---------------------------Event Listener for Heavy weapon aka right click---------------------------
 canvas.addEventListener("contextmenu", (e) => {
   e.preventDefault();
+  heavyWeaponSound.play();
   if (playScore <= 0) {
     return;
   }
@@ -462,6 +477,7 @@ addEventListener("keypress", (e) => {
 
     //Rendering player Score in score board html element
     scoreBoard.innerHTML = `Score:${playScore}`;
+    hugeWeaponSound.play();
     hugeWeapons.push(new HugeWeapon(0, 0, hugeWeaponDamage));
   }
 });
@@ -470,7 +486,7 @@ addEventListener("contextmenu", (e) => {
   e.preventDefault();
 });
 
-addEventListener("contextmenu", (e) => {
-  window.location.reload()
+addEventListener("resize", (e) => {
+  window.location.reload();
 });
 animation();
