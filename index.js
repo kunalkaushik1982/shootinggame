@@ -5,7 +5,8 @@ document.querySelector(".myGame").appendChild(canvas);
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 const context = canvas.getContext("2d");
-
+const lightWeaponDamage = 10;
+const heavyWeaponDamage = 20;
 let difficulty = 2;
 const form = document.querySelector("form");
 const scoreBoard = document.querySelector(".scoreBoard");
@@ -71,12 +72,13 @@ class Player {
 
 //Creating Weapon Class
 class Weapon {
-  constructor(x, y, radius, color, velocity) {
+  constructor(x, y, radius, color, velocity,damage) {
     this.x = x;
     this.y = y;
     this.radius = radius;
     this.color = color;
     this.velocity = velocity;
+    this.damage=damage;
   }
   draw() {
     context.beginPath();
@@ -268,9 +270,9 @@ function animation() {
       );
       if (distanceBetweenWeaponAndEnemy - weapon.radius - enemy.radius < 1) {
         //Reducing size of enemy on hit
-        if (enemy.radius > 18) {
+        if (enemy.radius > weapon.damage+8) {
           gsap.to(enemy, {
-            radius: enemy.radius - 10,
+            radius: enemy.radius - weapon.damage,
           });
           setTimeout(() => {
             weapons.splice(weaponIndex, 1);
@@ -300,7 +302,7 @@ function animation() {
 //---------------------------------------------Adding Event Listener---------------------------------------------
 
 // Event Listener for Light Weapon aka left click
-canvas.addEventListener("click", (e) => {
+canvas.addEventListener("contextmenu", (e) => {
   //finding angle between player position(center) and click co-ordinates
   const myAngle = Math.atan2(
     e.clientY - canvas.height / 2,
@@ -312,7 +314,26 @@ canvas.addEventListener("click", (e) => {
 
   //Adding Light weapon in weapons array
   weapons.push(
-    new Weapon(canvas.width / 2, canvas.height / 2, 6, "white", velocity)
+    new Weapon(canvas.width / 2, canvas.height / 2, 6, "white", velocity,lightWeaponDamage)
   );
 });
+
+// Event Listener for Heavy weapon aka right click
+canvas.addEventListener("click", (e) => {
+    e.preventDefault()
+    //finding angle between player position(center) and click co-ordinates
+    const myAngle = Math.atan2(
+      e.clientY - canvas.height / 2,
+      e.clientX - canvas.width / 2
+    );
+  
+    //Making const speed for heavy weapon
+    const velocity = { x: Math.cos(myAngle) * 3, y: Math.sin(myAngle) * 3 };
+  
+    //Adding heavy weapon in weapons array
+    weapons.push(
+      new Weapon(canvas.width / 2, canvas.height / 2, 30, "cyan", velocity,heavyWeaponDamage)
+    );
+  });
+
 animation();
