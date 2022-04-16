@@ -1,11 +1,37 @@
 const canvas = document.createElement("canvas");
 document.querySelector(".myGame").appendChild(canvas);
-
 canvas.width = innerWidth;
 canvas.height = innerHeight;
-
 const context = canvas.getContext("2d");
 
+let difficulty = 2;
+const form = document.querySelector("form")
+const scoreBoard = document.querySelector(".scoreBoard")
+
+document.querySelector("input").addEventListener("click",(e) =>{
+    e.preventDefault()
+    form.style.display="none"
+    scoreBoard.style.display="block"
+    const userValue = document.getElementById("difficulty").value
+    if (userValue === "Easy") {
+        setInterval(spawnEnemy, 2000);
+        return (difficulty = 5);
+      }
+      if (userValue === "Medium") {
+        setInterval(spawnEnemy, 1400);
+        return (difficulty = 8);
+      }
+      if (userValue === "Hard") {
+        setInterval(spawnEnemy, 1000);
+        return (difficulty = 10);
+      }
+      if (userValue === "Insane") {
+        setInterval(spawnEnemy, 700);
+        return (difficulty = 12);
+      }
+});
+
+// ---------------------
 playerPosition = { x: canvas.width / 2, y: canvas.height / 2 };
 class Player {
   constructor(x, y, radius, color) {
@@ -137,7 +163,7 @@ function animation() {
   });
 }
 
-setInterval(spawnEnemy,1000);
+//setInterval(spawnEnemy,1000);
 
 canvas.addEventListener("click", (e) => {
   const myAngle = Math.atan2(
