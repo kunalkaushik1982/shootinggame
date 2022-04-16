@@ -1,3 +1,5 @@
+//Basic Environment Setup
+
 const canvas = document.createElement("canvas");
 document.querySelector(".myGame").appendChild(canvas);
 canvas.width = innerWidth;
@@ -8,10 +10,18 @@ let difficulty = 2;
 const form = document.querySelector("form")
 const scoreBoard = document.querySelector(".scoreBoard")
 
+//Basic Function
+//Event Listener for Difficulty Form
 document.querySelector("input").addEventListener("click",(e) =>{
     e.preventDefault()
+
+    //Making form invisible
     form.style.display="none"
+    
+    //Making Score Board visible
     scoreBoard.style.display="block"
+
+    //Getting Difficulty level selected by user
     const userValue = document.getElementById("difficulty").value
     if (userValue === "Easy") {
         setInterval(spawnEnemy, 2000);
@@ -31,8 +41,12 @@ document.querySelector("input").addEventListener("click",(e) =>{
       }
 });
 
-// ---------------------
+// ---------------------Creating Player Weapon & Enenmy Classes-----------------------------
+
+//Setting Player Postion to center
 playerPosition = { x: canvas.width / 2, y: canvas.height / 2 };
+
+//Creating Player
 class Player {
   constructor(x, y, radius, color) {
     this.x = x;
@@ -55,7 +69,7 @@ class Player {
   }
 }
 
-//------------------
+//Creating Weapon Class
 class Weapon {
   constructor(x, y, radius, color, velocity) {
     this.x = x;
@@ -83,9 +97,8 @@ class Weapon {
     this.y += this.velocity.y;
   }
 }
-// ----------------------
 
-//------------------
+//Creating Enemy Class
 class Enemy {
   constructor(x, y, radius, color, velocity) {
     this.x = x;
@@ -113,64 +126,89 @@ class Enemy {
     this.y += this.velocity.y;
   }
 }
-// ----------------------
+// -----------------------------------------Main Logic Begins here----------------------------------------
 
-const pla = new Player(
-  playerPosition.x,
-  playerPosition.y,
-  15,
-  ` rgb(${Math.random() * 250},${Math.random() * 250},${Math.random() * 250})`
-);
-
+//Creating Player Object, Weapons array, Enemy array
+const pla = new Player(playerPosition.x,playerPosition.y,15,"white");
 const weapons = [];
 const enemies = [];
 
+
+//-----------------------------Function to create Spawn Enemy at random location-----------------------------
 const spawnEnemy = () => {
+    //Generating Random Size for Enemy
   const enemySize = Math.random() * (40 - 5) + 5;
-  const enemyColor = ` rgb(${Math.random() * 250},${Math.random() * 250},${
-    Math.random() * 250
-  })`;
+  //Generating Random Color for Enemy
+  const enemyColor = ` rgb(${Math.random() * 250},${Math.random() * 250},${Math.random() * 250 })`;
+
+  //Random Enemy Spwan Position
   let random;
+
+  //Making enemy location random but only from outsize of screen
   if (Math.random() < 0.5) {
+      // Making X equal to very left off of screen or very right off of screen and setting Y to any where vertically
     random = {
       x: Math.random() < 0.5 ? canvas.width + enemySize : 0 - enemySize,
       y: Math.random() * canvas.height,
     };
   } else {
+      // Making Y equal to very up off of screen or very down off of screen and setting X to any where horizontally
     random = {
       x: Math.random() * canvas.width,
       y: Math.random() < 0.5 ? canvas.height + enemySize : 0 - enemySize,
     };
   }
 
+ // Finding Angle between center (means Player Position) and enemy position
   const myAngle = Math.atan2(
     canvas.height / 2 - random.y,
     canvas.width / 2 - random.x
   );
+
+  // Making velocity or speed of enemy by multipling chosen difficulty to radian
   const velocity = { x: Math.cos(myAngle) * 5, y: Math.sin(myAngle) * 5 };
+
+   // Adding enemy to enemies array
   enemies.push(new Enemy(random.x, random.y, enemySize, enemyColor, velocity));
 };
 
+// ------------------------------------------------Creating Animation Function ---------------------------------------
 function animation() {
+    // Making Recursion
   requestAnimationFrame(animation);
+
+  // Clearing canvas on each frame
   context.clearRect(0, 0, canvas.width, canvas.height);
+
+  //Drawing Player
   pla.draw();
+
+  //Generating Bullets
   weapons.forEach((item) => {
     item.update();
   });
+
+   //Generating enemies
   enemies.forEach((item) => {
     item.update();
   });
 }
 
-//setInterval(spawnEnemy,1000);
+//---------------------------------------------Adding Event Listener---------------------------------------------
 
+// Event Listener for Light Weapon aka left click
 canvas.addEventListener("click", (e) => {
+
+    //finding angle between player position(center) and click co-ordinates
   const myAngle = Math.atan2(
     e.clientY - canvas.height / 2,
     e.clientX - canvas.width / 2
   );
+
+  //Making const speed for light weapon
   const velocity = { x: Math.cos(myAngle) * 5, y: Math.sin(myAngle) * 5 };
+
+  //Adding Light weapon in weapons array
   weapons.push(
     new Weapon(canvas.width / 2, canvas.height / 2, 6, "white", velocity)
   );
