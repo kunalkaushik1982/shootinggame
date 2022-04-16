@@ -126,19 +126,57 @@ class Enemy {
     this.y += this.velocity.y;
   }
 }
+
+//Creating Particle Class
+const friction = 0.99
+class Particle {
+  constructor(x, y, radius, color, velocity) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.color = color;
+    this.velocity = velocity;
+    this.alpha = 1;
+  }
+  draw() {
+    context.save();
+    context.globalAlpha = this.alpha;
+    context.beginPath();
+    context.arc(
+      this.x,
+      this.y,
+      this.radius,
+      (Math.PI / 180) * 0,
+      (Math.PI / 180) * 360,
+      false
+    );
+    context.fillStyle = this.color;
+    context.fill();
+    context.restore();
+  }
+  update() {
+    this.draw();
+    this.velocity.x *= friction
+    this.velocity.y *= friction
+    this.x += this.velocity.x;
+    this.y += this.velocity.y;
+    this.alpha -= 0.01;
+  }
+}
 // -----------------------------------------Main Logic Begins here----------------------------------------
 
 //Creating Player Object, Weapons array, Enemy array
 const pla = new Player(playerPosition.x, playerPosition.y, 15, "white");
 const weapons = [];
 const enemies = [];
+const particles = [];
 
 //-----------------------------Function to create Spawn Enemy at random location-----------------------------
 const spawnEnemy = () => {
   //Generating Random Size for Enemy
   const enemySize = Math.random() * (40 - 5) + 5;
   //Generating Random Color for Enemy
-  const enemyColor = ` hsl(${Math.floor(Math.random()*360)},100%,50%)`;
+  const enemyColor = ` hsl(${Math.floor(Math.random() * 360)},100%,50%)`;
 
   //Random Enemy Spwan Position
   let random;
@@ -178,15 +216,25 @@ function animation() {
   animationId = requestAnimationFrame(animation);
 
   // Clearing canvas on each frame
-  context.fillStyle="rgba(49,49,49,0.2)"
+  context.fillStyle = "rgba(49,49,49,0.2)";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
   //Drawing Player
   pla.draw();
 
+  //Generating Particles
+  particles.forEach((particle, particleIndex) => {
+    if (particle.alpha <= 0) {
+      particles.slice(particleIndex, 1);
+    } else {
+      particle.update();
+    }
+  });
+
   //Generating Bullets
   weapons.forEach((weapon, weaponIndex) => {
     weapon.update();
+    //Removing Weapons when they are offscreen
     if (
       weapon.x + weapon.radius < 1 ||
       weapon.y + weapon.radius < 1 ||
@@ -201,33 +249,49 @@ function animation() {
   enemies.forEach((enemy, enemyIndex) => {
     enemy.update();
 
+    //Finding distance between Player and enemies
     const distanceBetweenPlayerAndEnemy = Math.hypot(
       pla.x - enemy.x,
       pla.y - enemy.y
     );
-    if (distanceBetweenPlayerAndEnemy - abhi.radius - enemy.radius < 1) {
+
+    //Stopping Game if enemy hit player
+    if (distanceBetweenPlayerAndEnemy - pla.radius - enemy.radius < 1) {
       cancelAnimationFrame(animationId);
     }
 
     weapons.forEach((weapon, weaponIndex) => {
+      //Finding distance between Weapon and enemy
       const distanceBetweenWeaponAndEnemy = Math.hypot(
         weapon.x - enemy.x,
         weapon.y - enemy.y
       );
-      if (distanceBetweenWeaponAndEnemy - weapon.radius - enemy.radius < 1) { 
-            if(enemy.radius >18){
-                gsap.to(enemy,{
-                    radius:enemy.radius-10
-                })
-                setTimeout(() => {
-                    weapons.splice(weaponIndex,1)
-                }, 0);                
-            }else{
-                setTimeout(() => {
-                    enemies.splice(enemyIndex, 1);
-                    weapons.splice(weaponIndex, 1);
-                  }, 0);
-            }
+      if (distanceBetweenWeaponAndEnemy - weapon.radius - enemy.radius < 1) {
+        //Reducing size of enemy on hit
+        if (enemy.radius > 18) {
+          gsap.to(enemy, {
+            radius: enemy.radius - 10,
+          });
+          setTimeout(() => {
+            weapons.splice(weaponIndex, 1);
+          }, 0);
+        }
+        //Removing enemy on hit if they are below 18
+        else {
+          for (let i = 0; i < enemy.radius * 2; i++) {
+            particles.push(
+              new Particle(weapon.x, weapon.y, Math.random() * 2, enemy.color, {
+                x: (Math.random() - 0.5) + (Math.random() * 7),
+                y: (Math.random() - 0.5) + (Math.random() * 7),
+              })
+            );
+          }
+
+          setTimeout(() => {
+            enemies.splice(enemyIndex, 1);
+            weapons.splice(weaponIndex, 1);
+          }, 0);
+        }
       }
     });
   });
@@ -244,7 +308,7 @@ canvas.addEventListener("click", (e) => {
   );
 
   //Making const speed for light weapon
-  const velocity = { x: Math.cos(myAngle) * 6, y: Math.sin(myAngle) * 6};
+  const velocity = { x: Math.cos(myAngle) * 6, y: Math.sin(myAngle) * 6 };
 
   //Adding Light weapon in weapons array
   weapons.push(
