@@ -24,17 +24,23 @@ class Player {
 
 //------------------
 class Weapon {
-    constructor(x, y, radius, color) {
+    constructor(x, y, radius, color,velocity) {
       this.x = x;
       this.y = y;
       this.radius = radius;
       this.color = color;
+      this.velocity=velocity
     }
     draw() {
       context.beginPath();
       context.arc(this.x,this.y,this.radius,(Math.PI / 180) * 0,(Math.PI / 180) * 360,false);
       context.fillStyle = this.color;  
       context.fill();
+    }
+    update(){
+        this.draw()
+        this.x += this.velocity.x
+        this.y += this.velocity.y
     }
   }
 // ----------------------
@@ -45,13 +51,20 @@ const weapons = []
 
 function animation() {
   requestAnimationFrame(animation);
+  context.clearRect(0,0,canvas.width,canvas.height)
   pla.draw();
-  weapons.forEach((Weapon)=>{
-      Weapon.draw()
+  weapons.forEach((item)=>{
+    item.draw()
+    item.update()
   })
 }
 
 canvas.addEventListener("click",(e) =>{
-    weapons.push(new Weapon(e.clientX,e.clientY,6,"white"))
+    const myAngle = Math.atan2(
+        e.clientY-canvas.height/2,
+        e.clientX-canvas.width/2
+    )
+    const velocity={x:Math.cos(myAngle)*5,y:Math.sin(myAngle)*5}
+    weapons.push(new Weapon(canvas.width/2,canvas.height/2,6,"white",velocity))
 })
 animation();
