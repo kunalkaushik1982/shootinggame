@@ -11,6 +11,7 @@ const hugeWeaponDamage = 50;
 let difficulty = 2;
 const form = document.querySelector("form");
 const scoreBoard = document.querySelector(".scoreBoard");
+let playScore = 0;
 
 //Basic Function
 //Event Listener for Difficulty Form
@@ -106,7 +107,7 @@ class HugeWeapon {
   constructor(x, y, damage) {
     this.x = x;
     this.y = y;
-    this.color = "rgba(47,255,0,1)";
+    this.color = "rgba(255,0,133,1)";
     this.damage = damage;
   }
   draw() {
@@ -116,7 +117,7 @@ class HugeWeapon {
   }
   update() {
     this.draw();
-    this.x += 10;
+    this.x += 20;
   }
 }
 
@@ -292,17 +293,20 @@ function animation() {
       cancelAnimationFrame(animationId);
     }
 
-    hugeWeapons.forEach((hugeweapon)=>{
-        //Finding distance between huge weapon and enemy
-        const distanceBetweenHugeWeaponAndEnemy=hugeweapon.x-enemy.x
-        if(distanceBetweenHugeWeaponAndEnemy<=200 && distanceBetweenHugeWeaponAndEnemy > -200){
-            setTimeout(() => {
-                enemies.splice(enemyIndex,1)
-
-            }, 0);
-        }
-    })
-
+    hugeWeapons.forEach((hugeweapon) => {
+      //Finding distance between huge weapon and enemy
+      const distanceBetweenHugeWeaponAndEnemy = hugeweapon.x - enemy.x;
+      if (
+        distanceBetweenHugeWeaponAndEnemy <= 200 &&
+        distanceBetweenHugeWeaponAndEnemy > -200
+      ) {
+        // Increasing player score when killing one enemy
+        playScore += 10;
+        setTimeout(() => {
+          enemies.splice(enemyIndex, 1);
+        }, 0);
+      }
+    });
 
     weapons.forEach((weapon, weaponIndex) => {
       //Finding distance between Weapon and enemy
@@ -330,7 +334,11 @@ function animation() {
               })
             );
           }
+          // Increasing player score when killing one enemy
+          playScore += 10;
 
+          //Rendering player Score in score board html element
+          scoreBoard.innerHTML = `Score:${playScore}`;
           setTimeout(() => {
             enemies.splice(enemyIndex, 1);
             weapons.splice(weaponIndex, 1);
@@ -367,9 +375,17 @@ canvas.addEventListener("click", (e) => {
   );
 });
 
-// Event Listener for Heavy weapon aka right click
+// ---------------------------Event Listener for Heavy weapon aka right click---------------------------
 canvas.addEventListener("contextmenu", (e) => {
   e.preventDefault();
+  if(playScore <=0){return}
+
+  //Decreasing Player Score for using heavy weapon
+  playScore -= 2;
+
+  //Rendering player Score in score board html element
+  scoreBoard.innerHTML = `Score:${playScore}`;
+
   //finding angle between player position(center) and click co-ordinates
   const myAngle = Math.atan2(
     e.clientY - canvas.height / 2,
@@ -394,6 +410,14 @@ canvas.addEventListener("contextmenu", (e) => {
 
 addEventListener("keypress", (e) => {
   if (e.key === " ") {
+
+    if(playScore < 20){return}
+
+    //Decreasing Player Score for using huge weapon
+    playScore -= 20;
+  
+    //Rendering player Score in score board html element
+    scoreBoard.innerHTML = `Score:${playScore}`;
     hugeWeapons.push(new HugeWeapon(0, 0, hugeWeaponDamage));
   }
 });
