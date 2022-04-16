@@ -7,38 +7,38 @@ canvas.height = innerHeight;
 const context = canvas.getContext("2d");
 
 let difficulty = 2;
-const form = document.querySelector("form")
-const scoreBoard = document.querySelector(".scoreBoard")
+const form = document.querySelector("form");
+const scoreBoard = document.querySelector(".scoreBoard");
 
 //Basic Function
 //Event Listener for Difficulty Form
-document.querySelector("input").addEventListener("click",(e) =>{
-    e.preventDefault()
+document.querySelector("input").addEventListener("click", (e) => {
+  e.preventDefault();
 
-    //Making form invisible
-    form.style.display="none"
-    
-    //Making Score Board visible
-    scoreBoard.style.display="block"
+  //Making form invisible
+  form.style.display = "none";
 
-    //Getting Difficulty level selected by user
-    const userValue = document.getElementById("difficulty").value
-    if (userValue === "Easy") {
-        setInterval(spawnEnemy, 2000);
-        return (difficulty = 5);
-      }
-      if (userValue === "Medium") {
-        setInterval(spawnEnemy, 1400);
-        return (difficulty = 8);
-      }
-      if (userValue === "Hard") {
-        setInterval(spawnEnemy, 1000);
-        return (difficulty = 10);
-      }
-      if (userValue === "Insane") {
-        setInterval(spawnEnemy, 700);
-        return (difficulty = 12);
-      }
+  //Making Score Board visible
+  scoreBoard.style.display = "block";
+
+  //Getting Difficulty level selected by user
+  const userValue = document.getElementById("difficulty").value;
+  if (userValue === "Easy") {
+    setInterval(spawnEnemy, 2000);
+    return (difficulty = 5);
+  }
+  if (userValue === "Medium") {
+    setInterval(spawnEnemy, 1400);
+    return (difficulty = 8);
+  }
+  if (userValue === "Hard") {
+    setInterval(spawnEnemy, 1000);
+    return (difficulty = 10);
+  }
+  if (userValue === "Insane") {
+    setInterval(spawnEnemy, 700);
+    return (difficulty = 12);
+  }
 });
 
 // ---------------------Creating Player Weapon & Enenmy Classes-----------------------------
@@ -129,37 +129,38 @@ class Enemy {
 // -----------------------------------------Main Logic Begins here----------------------------------------
 
 //Creating Player Object, Weapons array, Enemy array
-const pla = new Player(playerPosition.x,playerPosition.y,15,"white");
+const pla = new Player(playerPosition.x, playerPosition.y, 15, "white");
 const weapons = [];
 const enemies = [];
 
-
 //-----------------------------Function to create Spawn Enemy at random location-----------------------------
 const spawnEnemy = () => {
-    //Generating Random Size for Enemy
+  //Generating Random Size for Enemy
   const enemySize = Math.random() * (40 - 5) + 5;
   //Generating Random Color for Enemy
-  const enemyColor = ` rgb(${Math.random() * 250},${Math.random() * 250},${Math.random() * 250 })`;
+  const enemyColor = ` rgb(${Math.random() * 250},${Math.random() * 250},${
+    Math.random() * 250
+  })`;
 
   //Random Enemy Spwan Position
   let random;
 
   //Making enemy location random but only from outsize of screen
   if (Math.random() < 0.5) {
-      // Making X equal to very left off of screen or very right off of screen and setting Y to any where vertically
+    // Making X equal to very left off of screen or very right off of screen and setting Y to any where vertically
     random = {
       x: Math.random() < 0.5 ? canvas.width + enemySize : 0 - enemySize,
       y: Math.random() * canvas.height,
     };
   } else {
-      // Making Y equal to very up off of screen or very down off of screen and setting X to any where horizontally
+    // Making Y equal to very up off of screen or very down off of screen and setting X to any where horizontally
     random = {
       x: Math.random() * canvas.width,
       y: Math.random() < 0.5 ? canvas.height + enemySize : 0 - enemySize,
     };
   }
 
- // Finding Angle between center (means Player Position) and enemy position
+  // Finding Angle between center (means Player Position) and enemy position
   const myAngle = Math.atan2(
     canvas.height / 2 - random.y,
     canvas.width / 2 - random.x
@@ -168,14 +169,15 @@ const spawnEnemy = () => {
   // Making velocity or speed of enemy by multipling chosen difficulty to radian
   const velocity = { x: Math.cos(myAngle) * 5, y: Math.sin(myAngle) * 5 };
 
-   // Adding enemy to enemies array
+  // Adding enemy to enemies array
   enemies.push(new Enemy(random.x, random.y, enemySize, enemyColor, velocity));
 };
 
 // ------------------------------------------------Creating Animation Function ---------------------------------------
+let animationId;
 function animation() {
-    // Making Recursion
-  requestAnimationFrame(animation);
+  // Making Recursion
+  animationId = requestAnimationFrame(animation);
 
   // Clearing canvas on each frame
   context.clearRect(0, 0, canvas.width, canvas.height);
@@ -184,13 +186,42 @@ function animation() {
   pla.draw();
 
   //Generating Bullets
-  weapons.forEach((item) => {
-    item.update();
+  weapons.forEach((weapon, weaponIndex) => {
+    weapon.update();
+    if (
+      weapon.x + weapon.radius < 1 ||
+      weapon.y + weapon.radius < 1 ||
+      weapon.x - weapon.radius > canvas.width ||
+      weapon.y - weapon.radius > canvas.height
+    ) {
+      weapons.splice(weaponIndex, 1);
+    }
   });
 
-   //Generating enemies
-  enemies.forEach((item) => {
-    item.update();
+  //Generating enemies
+  enemies.forEach((enemy, enemyIndex) => {
+    enemy.update();
+
+    const distanceBetweenPlayerAndEnemy = Math.hypot(
+      pla.x - enemy.x,
+      pla.y - enemy.y
+    );
+    if (distanceBetweenPlayerAndEnemy - abhi.radius - enemy.radius < 1) {
+      cancelAnimationFrame(animationId);
+    }
+
+    weapons.forEach((weapon, weaponIndex) => {
+      const distanceBetweenWeaponAndEnemy = Math.hypot(
+        weapon.x - enemy.x,
+        weapon.y - enemy.y
+      );
+      if (distanceBetweenWeaponAndEnemy - weapon.radius - enemy.radius < 1) {
+        setTimeout(() => {
+          enemies.splice(enemyIndex, 1);
+          weapons.splice(weaponIndex, 1);
+        }, 0);
+      }
+    });
   });
 }
 
@@ -198,8 +229,7 @@ function animation() {
 
 // Event Listener for Light Weapon aka left click
 canvas.addEventListener("click", (e) => {
-
-    //finding angle between player position(center) and click co-ordinates
+  //finding angle between player position(center) and click co-ordinates
   const myAngle = Math.atan2(
     e.clientY - canvas.height / 2,
     e.clientX - canvas.width / 2
