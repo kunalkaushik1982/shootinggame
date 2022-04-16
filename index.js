@@ -138,9 +138,7 @@ const spawnEnemy = () => {
   //Generating Random Size for Enemy
   const enemySize = Math.random() * (40 - 5) + 5;
   //Generating Random Color for Enemy
-  const enemyColor = ` rgb(${Math.random() * 250},${Math.random() * 250},${
-    Math.random() * 250
-  })`;
+  const enemyColor = ` hsl(${Math.floor(Math.random()*100)},100%,50%)`;
 
   //Random Enemy Spwan Position
   let random;
@@ -180,7 +178,8 @@ function animation() {
   animationId = requestAnimationFrame(animation);
 
   // Clearing canvas on each frame
-  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle="rgba(49,49,49,0.2)"
+  context.fillRect(0, 0, canvas.width, canvas.height);
 
   //Drawing Player
   pla.draw();
@@ -236,7 +235,7 @@ canvas.addEventListener("click", (e) => {
   );
 
   //Making const speed for light weapon
-  const velocity = { x: Math.cos(myAngle) * 5, y: Math.sin(myAngle) * 5 };
+  const velocity = { x: Math.cos(myAngle) * 6, y: Math.sin(myAngle) * 6};
 
   //Adding Light weapon in weapons array
   weapons.push(
