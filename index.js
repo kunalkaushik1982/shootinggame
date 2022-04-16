@@ -7,6 +7,7 @@ canvas.height = innerHeight;
 const context = canvas.getContext("2d");
 const lightWeaponDamage = 10;
 const heavyWeaponDamage = 20;
+const hugeWeaponDamage = 50;
 let difficulty = 2;
 const form = document.querySelector("form");
 const scoreBoard = document.querySelector(".scoreBoard");
@@ -72,13 +73,13 @@ class Player {
 
 //Creating Weapon Class
 class Weapon {
-  constructor(x, y, radius, color, velocity,damage) {
+  constructor(x, y, radius, color, velocity, damage) {
     this.x = x;
     this.y = y;
     this.radius = radius;
     this.color = color;
     this.velocity = velocity;
-    this.damage=damage;
+    this.damage = damage;
   }
   draw() {
     context.beginPath();
@@ -97,6 +98,25 @@ class Weapon {
     this.draw();
     this.x += this.velocity.x;
     this.y += this.velocity.y;
+  }
+}
+
+//Creating Huge Weapon Class
+class HugeWeapon {
+  constructor(x, y, damage) {
+    this.x = x;
+    this.y = y;
+    this.color = "rgba(47,255,0,1)";
+    this.damage = damage;
+  }
+  draw() {
+    context.beginPath();
+    context.fillStyle = this.color;
+    context.fillRect(this.x, this.y, 200, canvas.height);
+  }
+  update() {
+    this.draw();
+    this.x += 10;
   }
 }
 
@@ -130,7 +150,7 @@ class Enemy {
 }
 
 //Creating Particle Class
-const friction = 0.99
+const friction = 0.99;
 class Particle {
   constructor(x, y, radius, color, velocity) {
     this.x = x;
@@ -158,8 +178,8 @@ class Particle {
   }
   update() {
     this.draw();
-    this.velocity.x *= friction
-    this.velocity.y *= friction
+    this.velocity.x *= friction;
+    this.velocity.y *= friction;
     this.x += this.velocity.x;
     this.y += this.velocity.y;
     this.alpha -= 0.01;
@@ -170,6 +190,7 @@ class Particle {
 //Creating Player Object, Weapons array, Enemy array
 const pla = new Player(playerPosition.x, playerPosition.y, 15, "white");
 const weapons = [];
+const hugeWeapons = [];
 const enemies = [];
 const particles = [];
 
@@ -233,6 +254,15 @@ function animation() {
     }
   });
 
+  //Generating Huge Weapons
+  hugeWeapons.forEach((hugeweapon, hugeweaponIndex) => {
+    if (hugeweapon.x > canvas.width) {
+      hugeWeapons.splice(hugeweaponIndex, 1);
+    } else {
+      hugeweapon.update();
+    }
+  });
+
   //Generating Bullets
   weapons.forEach((weapon, weaponIndex) => {
     weapon.update();
@@ -262,6 +292,18 @@ function animation() {
       cancelAnimationFrame(animationId);
     }
 
+    hugeWeapons.forEach((hugeweapon)=>{
+        //Finding distance between huge weapon and enemy
+        const distanceBetweenHugeWeaponAndEnemy=hugeweapon.x-enemy.x
+        if(distanceBetweenHugeWeaponAndEnemy<=200 && distanceBetweenHugeWeaponAndEnemy > -200){
+            setTimeout(() => {
+                enemies.splice(enemyIndex,1)
+
+            }, 0);
+        }
+    })
+
+
     weapons.forEach((weapon, weaponIndex) => {
       //Finding distance between Weapon and enemy
       const distanceBetweenWeaponAndEnemy = Math.hypot(
@@ -270,7 +312,7 @@ function animation() {
       );
       if (distanceBetweenWeaponAndEnemy - weapon.radius - enemy.radius < 1) {
         //Reducing size of enemy on hit
-        if (enemy.radius > weapon.damage+8) {
+        if (enemy.radius > weapon.damage + 8) {
           gsap.to(enemy, {
             radius: enemy.radius - weapon.damage,
           });
@@ -283,8 +325,8 @@ function animation() {
           for (let i = 0; i < enemy.radius * 2; i++) {
             particles.push(
               new Particle(weapon.x, weapon.y, Math.random() * 2, enemy.color, {
-                x: (Math.random() - 0.5) + (Math.random() * 7),
-                y: (Math.random() - 0.5) + (Math.random() * 7),
+                x: Math.random() - 0.5 + Math.random() * 7,
+                y: Math.random() - 0.5 + Math.random() * 7,
               })
             );
           }
@@ -302,7 +344,7 @@ function animation() {
 //---------------------------------------------Adding Event Listener---------------------------------------------
 
 // Event Listener for Light Weapon aka left click
-canvas.addEventListener("contextmenu", (e) => {
+canvas.addEventListener("click", (e) => {
   //finding angle between player position(center) and click co-ordinates
   const myAngle = Math.atan2(
     e.clientY - canvas.height / 2,
@@ -314,26 +356,46 @@ canvas.addEventListener("contextmenu", (e) => {
 
   //Adding Light weapon in weapons array
   weapons.push(
-    new Weapon(canvas.width / 2, canvas.height / 2, 6, "white", velocity,lightWeaponDamage)
+    new Weapon(
+      canvas.width / 2,
+      canvas.height / 2,
+      6,
+      "white",
+      velocity,
+      lightWeaponDamage
+    )
   );
 });
 
 // Event Listener for Heavy weapon aka right click
-canvas.addEventListener("click", (e) => {
-    e.preventDefault()
-    //finding angle between player position(center) and click co-ordinates
-    const myAngle = Math.atan2(
-      e.clientY - canvas.height / 2,
-      e.clientX - canvas.width / 2
-    );
-  
-    //Making const speed for heavy weapon
-    const velocity = { x: Math.cos(myAngle) * 3, y: Math.sin(myAngle) * 3 };
-  
-    //Adding heavy weapon in weapons array
-    weapons.push(
-      new Weapon(canvas.width / 2, canvas.height / 2, 30, "cyan", velocity,heavyWeaponDamage)
-    );
-  });
+canvas.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+  //finding angle between player position(center) and click co-ordinates
+  const myAngle = Math.atan2(
+    e.clientY - canvas.height / 2,
+    e.clientX - canvas.width / 2
+  );
+
+  //Making const speed for heavy weapon
+  const velocity = { x: Math.cos(myAngle) * 3, y: Math.sin(myAngle) * 3 };
+
+  //Adding heavy weapon in weapons array
+  weapons.push(
+    new Weapon(
+      canvas.width / 2,
+      canvas.height / 2,
+      30,
+      "cyan",
+      velocity,
+      heavyWeaponDamage
+    )
+  );
+});
+
+addEventListener("keypress", (e) => {
+  if (e.key === " ") {
+    hugeWeapons.push(new HugeWeapon(0, 0, hugeWeaponDamage));
+  }
+});
 
 animation();
