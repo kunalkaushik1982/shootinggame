@@ -1,32 +1,5 @@
 Skip to content
-Search or jump to…
-Pull requests
-Issues
-Marketplace
-Explore
- 
-@kunalkaushik1982 
-meabhisingh
-/
-canvasGame
-Public
-Code
-Issues
-Pull requests
-Actions
-Projects
-Wiki
-Security
-Insights
-canvasGame/style.css
-@meabhisingh
-meabhisingh crosshair fixed
-Latest commit 1cc4700 on Oct 1, 2021
- History
- 1 contributor
-106 lines (98 sloc)  1.83 KB
-   
-.myGame {
+  .myGame {
   height: 100vh;
 }
 
@@ -132,16 +105,3 @@ form > input:hover {
   color: white;
   font: 600 1.2vmax cursive;
 }
-© 2022 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Docs
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
-Loading complete
