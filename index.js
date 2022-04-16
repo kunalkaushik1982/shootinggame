@@ -44,6 +44,46 @@ document.querySelector("input").addEventListener("click", (e) => {
   }
 });
 
+// Endscreen
+const gameoverLoader = () => {
+  // Creating endscreen div and play again button and high score element
+  const gameOverBanner = document.createElement("div");
+  const gameOverBtn = document.createElement("button");
+  const highScore = document.createElement("div");
+
+  highScore.innerHTML = `High Score : ${
+    localStorage.getItem("highScore")
+      ? localStorage.getItem("highScore")
+      : playScore
+  }`;
+
+  const oldHighScore =
+    localStorage.getItem("highScore") && localStorage.getItem("highScore");
+
+  if (oldHighScore < playScore) {
+    localStorage.setItem("highScore", playScore);
+
+    // updating high score html
+    highScore.innerHTML = `High Score: ${playScore}`;
+  }
+
+  // adding text to playagain button
+  gameOverBtn.innerText = "Play Again";
+
+  gameOverBanner.appendChild(highScore);
+
+  gameOverBanner.appendChild(gameOverBtn);
+
+  // Making reload on clicking playAgain button
+  gameOverBtn.onclick = () => {
+    window.location.reload();
+  };
+
+  gameOverBanner.classList.add("gameover");
+
+  document.querySelector("body").appendChild(gameOverBanner);
+};
+
 // ---------------------Creating Player Weapon & Enenmy Classes-----------------------------
 
 //Setting Player Postion to center
@@ -291,6 +331,7 @@ function animation() {
     //Stopping Game if enemy hit player
     if (distanceBetweenPlayerAndEnemy - pla.radius - enemy.radius < 1) {
       cancelAnimationFrame(animationId);
+      return gameoverLoader();
     }
 
     hugeWeapons.forEach((hugeweapon) => {
@@ -378,7 +419,9 @@ canvas.addEventListener("click", (e) => {
 // ---------------------------Event Listener for Heavy weapon aka right click---------------------------
 canvas.addEventListener("contextmenu", (e) => {
   e.preventDefault();
-  if(playScore <=0){return}
+  if (playScore <= 0) {
+    return;
+  }
 
   //Decreasing Player Score for using heavy weapon
   playScore -= 2;
@@ -410,16 +453,24 @@ canvas.addEventListener("contextmenu", (e) => {
 
 addEventListener("keypress", (e) => {
   if (e.key === " ") {
-
-    if(playScore < 20){return}
+    if (playScore < 20) {
+      return;
+    }
 
     //Decreasing Player Score for using huge weapon
     playScore -= 20;
-  
+
     //Rendering player Score in score board html element
     scoreBoard.innerHTML = `Score:${playScore}`;
     hugeWeapons.push(new HugeWeapon(0, 0, hugeWeaponDamage));
   }
 });
 
+addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+});
+
+addEventListener("contextmenu", (e) => {
+  window.location.reload()
+});
 animation();
