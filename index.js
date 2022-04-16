@@ -138,7 +138,7 @@ const spawnEnemy = () => {
   //Generating Random Size for Enemy
   const enemySize = Math.random() * (40 - 5) + 5;
   //Generating Random Color for Enemy
-  const enemyColor = ` hsl(${Math.floor(Math.random()*100)},100%,50%)`;
+  const enemyColor = ` hsl(${Math.floor(Math.random()*360)},100%,50%)`;
 
   //Random Enemy Spwan Position
   let random;
@@ -214,11 +214,20 @@ function animation() {
         weapon.x - enemy.x,
         weapon.y - enemy.y
       );
-      if (distanceBetweenWeaponAndEnemy - weapon.radius - enemy.radius < 1) {
-        setTimeout(() => {
-          enemies.splice(enemyIndex, 1);
-          weapons.splice(weaponIndex, 1);
-        }, 0);
+      if (distanceBetweenWeaponAndEnemy - weapon.radius - enemy.radius < 1) { 
+            if(enemy.radius >18){
+                gsap.to(enemy,{
+                    radius:enemy.radius-10
+                })
+                setTimeout(() => {
+                    weapons.splice(weaponIndex,1)
+                }, 0);                
+            }else{
+                setTimeout(() => {
+                    enemies.splice(enemyIndex, 1);
+                    weapons.splice(weaponIndex, 1);
+                  }, 0);
+            }
       }
     });
   });
