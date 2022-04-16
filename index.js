@@ -16,34 +16,42 @@ class Player {
   }
   draw() {
     context.beginPath();
-    context.arc(
-      this.x,
-      this.y,
-      this.radius,
-      (Math.PI / 180) * 0,
-      (Math.PI / 180) * 360,
-      false
-    );
+    context.arc(this.x,this.y,this.radius,(Math.PI / 180) * 0,(Math.PI / 180) * 360,false);
     context.fillStyle = this.color;
-
     context.fill();
   }
-//   update() {
-//     this.x += Math.random() * 10;
-//     this.y += Math.random() * 10;
-//   }
 }
 
-const pla = new Player(
-  playerPosition.x,
-  playerPosition.y,
-  15,
-  ` rgb(${Math.random() * 250},${Math.random() * 250},${Math.random() * 250})`
-);
+//------------------
+class Weapon {
+    constructor(x, y, radius, color) {
+      this.x = x;
+      this.y = y;
+      this.radius = radius;
+      this.color = color;
+    }
+    draw() {
+      context.beginPath();
+      context.arc(this.x,this.y,this.radius,(Math.PI / 180) * 0,(Math.PI / 180) * 360,false);
+      context.fillStyle = this.color;  
+      context.fill();
+    }
+  }
+// ----------------------
+
+const pla = new Player(playerPosition.x,playerPosition.y,15,` rgb(${Math.random() * 250},${Math.random() * 250},${Math.random() * 250})`);
+
+const weapons = []
 
 function animation() {
   requestAnimationFrame(animation);
   pla.draw();
-  //pla.update();
+  weapons.forEach((Weapon)=>{
+      Weapon.draw()
+  })
 }
+
+canvas.addEventListener("click",(e) =>{
+    weapons.push(new Weapon(e.clientX,e.clientY,6,"white"))
+})
 animation();
